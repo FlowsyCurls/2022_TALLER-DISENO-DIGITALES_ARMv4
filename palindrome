@@ -1,0 +1,49 @@
+		;		ROLE OF THE REGISTERS
+		;		r0  = temp register for assignment
+		;		r1  = initial pointer address
+		;		r2  = end pointer address
+		;		r3  = initial pointer value
+		;		r4  = end pointer value
+		;		...
+		;		r10 = address and value of string length
+		;		r11 = address of the beginning of the string
+		;		r12 = result address
+		
+		
+		;		Assigning addresses and values to registers
+start	mov		r10, #0x150   	; dir string length
+		ldr		r10,[r10]		; value string length
+		mov		r11, #0x170   	; dir beginning of the string
+		mov		r12, #0x100	; dir result
+		mov		r1, r11		; dir initial pointer
+		mov		r2, r11		; dir end pointer
+		mov		r0, #1		; ctr (counter)
+		
+		;		Sum sequence to assign the value of the end pointer
+mul		add		r0,r0,#1		; ctr += 1
+		add		r2,r2,#4		; end += 4
+		cmp		r0, r10		; ctr == length
+		bne		mul
+		
+loop		ldr		r3, [r1]		; load initial pointer value
+		ldr		r4, [r2]		; load end pointer value
+		cmp		r3, r4		; *ini != *end
+		bne		notpal
+		
+		;		Stop condition
+		cmp		r1,r2		; ini = end  		(odd)
+		beq		ispal
+		
+		add		r0,r1,#4
+		cmp		r0,r2		; ini + 4 == end 	(even)
+		beq		ispal
+		
+		add		r1,r1,#4		; ini -= 4
+		sub		r2,r2,#4		; end -= 4
+		b		loop
+		
+notpal	mov		r0,#0x10
+		b		result
+		
+ispal	mov		r0,#0xFF
+result	str		r0, [r12]
